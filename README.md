@@ -20,7 +20,7 @@ pip install pygame numpy
 To start the game, simply run the Python script `snake.py` using the following command:
 
 ```
-python snake.py
+python3 snake.py
 ```
 
 Once the game window opens, you can observe the AI player's performance. The AI player learns by updating a Q-table based on its actions and rewards. It uses a basic Q-learning algorithm to improve its performance over time.
