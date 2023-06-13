@@ -1,47 +1,55 @@
-# Snake AI Game
+# Snake Game with Deep Q-Network (DQN) Reinforcement Learning
 
-This program, `snake.py`, is an implementation of the classic Snake game using the Pygame library. The game features an AI player that learns to navigate the grid and collect fruits while avoiding self-collisions.
+This program implements the classic Snake game using the Deep Q-Network (DQN) algorithm for reinforcement learning. The DQN model learns to navigate the game grid and collect fruits while avoiding self-collisions.
 
-## Prerequisites
+## Requirements
 
-To run this program, you need to have Python installed on your machine. Additionally, you need to have the following libraries installed:
+- Python 3.x
+- Pygame library
+- PyTorch library
 
-- Pygame
-- NumPy
+## Installation
 
-You can install the required libraries using the following command:
+1. Clone the repository or download the code files.
+2. Install the required dependencies using the following command:
 
-```
-pip install pygame numpy
-```
+   ```
+   pip install pygame torch
+   ```
 
 ## Usage
 
-To start the game, simply run the Python script `snake.py` using the following command:
+1. Run the program using the following command:
 
-```
-python3 snake.py
-```
+   ```
+   python3 snake_game.py
+   ```
 
-Once the game window opens, you can observe the AI player's performance. The AI player learns by updating a Q-table based on its actions and rewards. It uses a basic Q-learning algorithm to improve its performance over time.
-
-## Game Controls
-
-The AI player controls the movement of the snake automatically. You can observe the snake moving on the grid and collecting fruits. The game runs in an infinite loop until you close the game window.
+2. The game window will open, and you will see the snake navigating the grid.
+3. The game will start automatically, and the snake will move on its own according to the learned policy.
+4. If you want to manually control the snake, you can modify the code to accept user input and control the direction of the snake.
+5. The DQN model will learn and improve its performance over time through reinforcement learning.
+6. The program will save the learned model parameters to the "model.pth" file periodically, allowing you to resume training or play the game using the saved model in subsequent runs.
 
 ## Customization
 
-You can modify certain parameters in the script to customize the game behavior. Here are the available parameters:
+You can customize the game parameters and AI parameters by modifying the constants defined at the beginning of the code:
 
-- `WINDOW_SIZE`: The size of the game window in pixels (square window).
-- `GRID_SIZE`: The number of grid cells in each row and column.
-- `GRID_OFFSET`: The size of the offset around each grid cell for drawing.
-- `LEARNING_RATE`: The learning rate of the Q-learning algorithm.
-- `DISCOUNT_FACTOR`: The discount factor for future rewards in the Q-learning algorithm.
-- `EPSILON`: The exploration rate, determining the likelihood of the AI player taking random actions.
+- `WINDOW_SIZE`: Specifies the size of the game window in pixels.
+- `GRID_SIZE`: Specifies the number of cells in each row and column of the game grid.
+- `DISCOUNT_FACTOR`: Controls the importance of future rewards in the Q-learning update.
+- `EPSILON`: Determines the exploration-exploitation trade-off during action selection.
+- `LEARNING_RATE`: Controls the learning rate for updating the Q-values.
+- `BATCH_SIZE`: Specifies the batch size for mini-batch updates.
 
-Feel free to experiment with different parameter values to observe their effects on the AI player's performance.
+Feel free to adjust these parameters to experiment with different settings and observe the effects on the AI's learning and gameplay.
 
-## Acknowledgements
+## License
 
-This program is inspired by the classic Snake game and Q-learning algorithm. It utilizes the Pygame library for graphics and user interface, as well as the NumPy library for efficient array operations.
+This project is licensed under the [MIT License](LICENSE).
+
+## Acknowledgments
+
+- The Pygame library: https://www.pygame.org/
+- The PyTorch library: https://pytorch.org/
+- OpenAI for the DQN algorithm: https://openai.com/
