@@ -1,41 +1,44 @@
-# Snake Game with Deep Q-Learning
+# Deep Q-Learning Snake Game with Pygame and PyTorch
 
-This is a Python implementation of the classic Snake game using Pygame, where the snake is controlled by an AI agent trained using Deep Q-Learning.
+This Python script implements a classic game of Snake using the Pygame library. It utilizes Deep Q-Learning (DQN) for training an agent to play the game. The agent uses a neural network implemented using the PyTorch library to make decisions based on the game state.
 
-## Requirements
+## Prerequisites
 
-This implementation requires the following Python libraries:
+To run this script, you need to have the following Python libraries installed:
 
-- Pygame
-- Numpy
-- PyTorch
+- pygame
+- numpy
+- torch
 
-## Usage
+You can install them using pip:
+```
+pip install pygame numpy torch
+```
 
-Just run `snake_dqn.py` to start the game. The game window should open and you'll see the snake moving around and learning as it plays more games.
+## How to Run the Script
 
-## Overview
+You can run the script using the following command in the terminal:
 
-The AI agent is trained using Deep Q-Learning where the state is the grid of the game, the actions are the four possible directions the snake can go to (up, right, down, left), and the reward is based on the result of the action (1 for eating a fruit, -1 for hitting itself and 0 otherwise).
+```
+python3 dqn_snake.py
+```
 
-The game uses an epsilon-greedy strategy for action selection, which balances between exploitation (choosing the best known action) and exploration (choosing a random action). Currently, the epsilon value is set at 0.1, which means the AI agent will choose a random action 10% of the time and the best known action 90% of the time.
+If an existing model file `model.pth` is found in the current directory, the script will load the saved model parameters. Otherwise, it will start training from scratch.
 
-## Model
+The script will continue running the game and training the model until you manually stop it (e.g., by closing the pygame window).
 
-The AI agent uses a Deep Q-Network (DQN) model with two convolutional layers and two fully connected layers. The Q-values for each action are calculated by passing the game state through the model.
+## Model Training
 
-The model's parameters are updated based on the loss calculated from the difference between the current Q-values and the target Q-values. 
+The DQN agent is trained with a replay memory to improve the learning process. Experiences (state, action, reward, and new state) are stored in the replay memory and sampled randomly for training the model, which breaks the correlation between consecutive experiences and improves the stability and performance of the DQN.
 
-## Saving and Loading
+The agent uses an epsilon-greedy strategy with a decaying epsilon for action selection. At the beginning of training, the epsilon is high (EPSILON_START) to encourage more exploration. The epsilon value decays after each game loop (multiplied by EPSILON_DECAY) until it reaches a minimum value (EPSILON_END), allowing more exploitation of the learned policy.
 
-The model parameters are saved to 'model.pth' when the game is quit. If 'model.pth' exists when the script is run, the model parameters are loaded from this file. If the file doesn't exist, the model starts learning from scratch.
+The agent gets a reward of -10 if it hits itself, a reward of -1 for a normal step, and a reward of 10 when it gets the fruit. This reward structure encourages the agent to get the fruit while avoiding hitting itself and to reach the fruit as fast as possible.
 
-## Customization
+## Model Saving
 
-You can modify various parameters in the script to change the behavior and performance of the AI agent. For example, you can change the size of the game grid, the learning rate, the discount factor, the batch size, etc.
+The script automatically saves the trained model parameters to a file named 'model.pth' when the pygame window is manually closed. When you run the script next time, the saved model parameters will be loaded.
 
-## Future Improvements
+This allows you to stop and resume the training process at any time without losing the learned knowledge. You can also use the trained model for playing the game without further training.
 
-- Implement a replay memory for storing and sampling previous experiences to improve the learning process.
-- Use a decaying epsilon for the epsilon-greedy strategy, starting with a high value for more exploration and gradually decreasing it for more exploitation.
-- Consider more sophisticated reward structures for better training results.
+Please note that training the model to play the game well can take a long time (often requiring millions of game steps), depending on the complexity of the game and the capacity and architecture of the model. The training process can be accelerated by using a more powerful computer or a cloud-based machine learning platform that supports PyTorch.
