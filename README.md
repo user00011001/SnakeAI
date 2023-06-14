@@ -20,7 +20,7 @@ pip install pygame numpy torch
 You can run the script using the following command in the terminal:
 
 ```
-python3 dqn_snake.py
+python3 snake.py
 ```
 
 If an existing model file `model.pth` is found in the current directory, the script will load the saved model parameters. Otherwise, it will start training from scratch.
