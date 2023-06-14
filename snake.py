@@ -14,9 +14,12 @@ GRID_OFFSET = 2
 
 # AI parameters
 DISCOUNT_FACTOR = 0.8
-EPSILON = 0.1
+EPSILON_START = 1.0
+EPSILON_END = 0.01
+EPSILON_DECAY = 0.995
 LEARNING_RATE = 0.01
 BATCH_SIZE = 32
+REPLAY_MEMORY_SIZE = 5000
 
 # Pygame initialization
 pygame.init()
@@ -57,6 +60,12 @@ snake = deque([(GRID_SIZE//2, GRID_SIZE//2)])
 directions = ["UP", "RIGHT", "DOWN", "LEFT"]
 direction = 0  # start moving up
 fruit = None
+
+# Epsilon value
+epsilon = EPSILON_START
+
+# Replay memory
+replay_memory = deque(maxlen=REPLAY_MEMORY_SIZE)
 
 def draw_grid():
     win.fill((0, 0, 0))
@@ -105,45 +114,42 @@ def step(action):
     head_x %= GRID_SIZE
     head_y %= GRID_SIZE
     if (head_x, head_y) in snake:
-        return -1  # hit self
+        return -10  # hit self
     snake.appendleft((head_x, head_y))
     if fruit is None or (head_x, head_y) != fruit:
         snake.pop()  # didn't get fruit, remove tail
         if fruit is None:
             spawn_fruit()
-        return 0  # normal step
+        return -1  # normal step
     else:
-        spawn_fruit()
-        return 1  # got fruit
+        fruit = None  # remove the eaten fruit
+        return 10  # got fruit
 
-def update_model(state, action, new_state, reward, done):
-    # Convert state to tensor
-    state_tensor = torch.from_numpy(state).float().unsqueeze(0)
-    new_state_tensor = torch.from_numpy(new_state).float().unsqueeze(0)
+def update_model(batch):
+    states, actions, rewards, new_states, dones = zip(*batch)
 
-    # Get Q-values
-    q_values = model(state_tensor)
-    with torch.no_grad():
-        new_q_values = model(new_state_tensor)
+    states = torch.from_numpy(np.array(states)).float().unsqueeze(1)  # Add a channel dimension
+    actions = torch.tensor(actions)
+    rewards = torch.tensor(rewards, dtype=torch.float)
+    new_states = torch.from_numpy(np.array(new_states)).float().unsqueeze(1)  # Add a channel dimension
+    dones = torch.tensor(dones, dtype=torch.bool)
 
-    # Get target Q-value
-    target_q_value = reward
-    if not done:
-        target_q_value += DISCOUNT_FACTOR * torch.max(new_q_values).item()
+    q_values = model(states)
+    next_q_values = model(new_states)
 
-    # Convert target Q-value to tensor with the same size as q_values
-    target_q_values_tensor = q_values.clone()
-    target_q_values_tensor[0][action] = target_q_value
+    q_values = q_values.gather(1, actions.unsqueeze(1)).squeeze()
+    next_q_value = next_q_values.max(1)[0]
+    expected_q_values = rewards + DISCOUNT_FACTOR * next_q_value * (~dones)
 
-    # Compute loss
-    loss = criterion(q_values, target_q_values_tensor)
+    loss = criterion(q_values, expected_q_values.detach())
 
-    # Update model
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
 
-
+def update_epsilon():
+    global epsilon
+    epsilon = max(epsilon * EPSILON_DECAY, EPSILON_END)
 
 # Load the model parameters if the file exists
 try:
@@ -171,7 +177,7 @@ while True:
             state[y][x] = -1  # mark snake body
 
     # Select action
-    if random.random() < EPSILON:
+    if random.random() < epsilon:
         action = random.randint(0, 3)  # random action
     else:
         with torch.no_grad():
@@ -180,16 +186,29 @@ while True:
 
     # Perform action
     reward = step(action)
-    if reward == -1:  # hit self
+    done = reward == -10
+
+    # Get new state
+    new_state = np.zeros((GRID_SIZE, GRID_SIZE))
+    head_x, head_y = snake[0]
+    new_state[head_y][head_x] = 1  # mark head position
+    for i, (x, y) in enumerate(snake):
+        if i > 0:
+            new_state[y][x] = -1  # mark snake body
+
+    # Store experience in replay memory
+    replay_memory.append((state, action, reward, new_state, done))
+
+    # Sample random batch from replay memory
+    if len(replay_memory) >= BATCH_SIZE:
+        batch = random.sample(replay_memory, BATCH_SIZE)
+        update_model(batch)
+
+    # Decay epsilon
+    update_epsilon()
+
+    if done:
         reset()
-    else:
-        new_state = np.zeros((GRID_SIZE, GRID_SIZE))
-        head_x, head_y = snake[0]
-        new_state[head_y][head_x] = 1  # mark head position
-        for i, (x, y) in enumerate(snake):
-            if i > 0:
-                new_state[y][x] = -1  # mark snake body
-        update_model(state, action, new_state, reward, reward == -1)
 
     # Drawing
     draw_grid()
