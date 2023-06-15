@@ -154,7 +154,6 @@ def update_epsilons():
     global epsilons
     epsilons = [max(epsilon * EPSILON_DECAY, EPSILON_END) for epsilon in epsilons]
 
-# Step function for each model
 def step(action, model_index):
     global directions, snakes, fruit
     head_x, head_y = snakes[model_index][0]
@@ -181,7 +180,10 @@ def step(action, model_index):
         snakes[model_index].pop()  # didn't get fruit, remove tail
         if fruit is None:
             fruit = spawn_fruit(snakes[model_index])
-        return -1 + 1 / distance(head_x, head_y, fruit[0], fruit[1])  # normal step + smaller reward for getting closer
+        reward = -1 + 1 / distance(head_x, head_y, fruit[0], fruit[1])  # normal step + smaller reward for getting closer
+        if len(snakes[model_index]) > max(len(snake) for snake in snakes):
+            reward += 5  # reward for being the longest snake
+        return reward
 
 # Update the model for each model
 def update_models(batch, model_index):
