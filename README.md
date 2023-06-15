@@ -17,7 +17,7 @@ This is a Python program that implements a snake game with AI-controlled snakes.
 
 2. Run the program by executing the Python file:
    ```
-   python snake_ai_shared_apple.py
+   python3 snake.py
    ```
 
 3. The game window will open, and the AI-controlled snakes will start playing the game. The snakes are represented by different colors on the grid.
