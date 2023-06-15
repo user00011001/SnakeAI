@@ -15,9 +15,33 @@ GRID_OFFSET = 2
 
 # AI parameters
 MODEL_PARAMS = [
-    {"name": "model1", "color": (255, 0, 0), "discount_factor": 0.8, "learning_rate": 0.01},
-    {"name": "model2", "color": (0, 255, 0), "discount_factor": 0.9, "learning_rate": 0.001},
-    {"name": "model", "color": (0, 0, 255), "discount_factor": 0.5, "learning_rate": 0.01},
+    {
+        "name": "model",
+        "color": (255, 0, 0),
+        "discount_factor": 0.8,
+        "learning_rate": 0.01,
+        # Additional parameters for model1
+        "parameter1": 0.5,
+        "parameter2": "value1"
+    },
+    {
+        "name": "model1",
+        "color": (0, 255, 0),
+        "discount_factor": 0.9,
+        "learning_rate": 0.001,
+        # Additional parameters for model2
+        "parameter1": 0.2,
+        "parameter2": "value2"
+    },
+    {
+        "name": "model2",
+        "color": (0, 0, 255),
+        "discount_factor": 0.5,
+        "learning_rate": 0.01,
+        # Additional parameters for model3
+        "parameter1": 0.7,
+        "parameter2": "value3"
+    },
     # Add more models here
 ]
 
