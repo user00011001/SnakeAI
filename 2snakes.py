@@ -145,8 +145,10 @@ def step(action, model_index):
         head_x -= 1
     head_x %= GRID_SIZE
     head_y %= GRID_SIZE
-    if (head_x, head_y) in snakes[model_index]:
-        return -10  # hit self
+    if (head_x, head_y) in snakes[model_index] or any((head_x, head_y) in s for i, s in enumerate(snakes) if i != model_index):
+        # Reset the snake's size to its initial state
+        snakes[model_index] = deque([(GRID_SIZE//2, GRID_SIZE//2)])
+        return -10  # hit self or other model
     snakes[model_index].appendleft((head_x, head_y))
     if (head_x, head_y) == fruits[model_index]:
         fruits[model_index] = None  # remove the eaten fruit
@@ -274,6 +276,11 @@ while True:
             new_state[1] = distance(head_x, head_y, fruits[i][0], fruits[i][1])  # Add distance to fruit as a feature
         new_states.append(new_state)
 
+        # Check for collisions
+        if reward == -10:
+            # Reset the size of the snake to its initial state
+            snakes[i] = deque([(GRID_SIZE//2, GRID_SIZE//2)])
+
     # Add to replay memory for each model
     for i in range(len(models)):
         replay_memories[i].append((states[i], actions[i], rewards[i], new_states[i], rewards[i] < 0))
@@ -296,3 +303,4 @@ while True:
 
     # Control the frame rate
     clock.tick(10)
+
