@@ -136,6 +136,7 @@ def step(action):
     head_x %= GRID_SIZE
     head_y %= GRID_SIZE
     if (head_x, head_y) in snake:
+        snake = deque([(head_x, head_y)])  # Reset snake's size to 1
         return -10  # hit self
     snake.appendleft((head_x, head_y))
     if (head_x, head_y) == fruit:
