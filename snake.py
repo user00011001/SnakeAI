@@ -64,7 +64,7 @@ clock = pygame.time.Clock()
 class DQN(nn.Module):
     def __init__(self):
         super(DQN, self).__init__()
-        self.conv1 = nn.Conv2d(2, 16, kernel_size=3, stride=1)  # Change the input channel to 2
+        self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=1)  # Change the input channel to 3
         self.conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=1)
         self.fc1 = nn.Linear(32 * 16 * 16, 256)
         self.fc2 = nn.Linear(256, 4)  # output for each action
@@ -204,7 +204,7 @@ def update_models(batch, model_index):
 
     q_values = q_values.gather(1, actions.unsqueeze(1)).squeeze()
     next_q_value = next_q_values.max(1)[0]
-    expected_q_values = rewards + model_params["discount_factor"] * next_q_value * (~dones)
+    expected_q_values = rewards + MODEL_PARAMS[model_index]["discount_factor"] * next_q_value * (~dones)
 
     loss = criterion(q_values, expected_q_values.detach())
 
@@ -268,14 +268,18 @@ while True:
     # Get states for each model
     states = []
     for i in range(len(models)):
-        state = np.zeros((2, GRID_SIZE, GRID_SIZE))  # Change from 1 to 2
+        state = np.zeros((3, GRID_SIZE, GRID_SIZE))  # Change from 2 to 3
         head_x, head_y = snakes[i][0]
         state[0][head_y][head_x] = 1  # mark head position
         for j, (x, y) in enumerate(snakes[i]):
             if j > 0:
                 state[0][y][x] = -1  # mark snake body
+        for j, other_snake in enumerate(snakes):
+            if j != i:
+                for (x, y) in other_snake:
+                    state[1][y][x] = -1  # mark other snake body
         if fruit is not None:
-            state[1] = distance(head_x, head_y, fruit[0], fruit[1])  # Add distance to fruit as a feature
+            state[2] = distance(head_x, head_y, fruit[0], fruit[1])  # Add distance to fruit as a feature
         states.append(state)
 
     # AI decision for each model
@@ -296,14 +300,18 @@ while True:
         rewards.append(reward)
 
         # Get new state
-        new_state = np.zeros((2, GRID_SIZE, GRID_SIZE))  # Change from 1 to 2
+        new_state = np.zeros((3, GRID_SIZE, GRID_SIZE))  # Change from 2 to 3
         head_x, head_y = snakes[i][0]
         new_state[0][head_y][head_x] = 1  # mark head position
         for j, (x, y) in enumerate(snakes[i]):
             if j > 0:
                 new_state[0][y][x] = -1  # mark snake body
+        for j, other_snake in enumerate(snakes):
+            if j != i:
+                for (x, y) in other_snake:
+                    new_state[1][y][x] = -1  # mark other snake body
         if fruit is not None:
-            new_state[1] = distance(head_x, head_y, fruit[0], fruit[1])  # Add distance to fruit as a feature
+            new_state[2] = distance(head_x, head_y, fruit[0], fruit[1])  # Add distance to fruit as a feature
         new_states.append(new_state)
 
         # Check for collisions
