@@ -1,51 +1,49 @@
-# Snake Game with AI using Deep Q-Learning
+# Snake AI with Shared Apple
 
-This is a simple implementation of the classic Snake game using Pygame library, along with an AI agent trained with Deep Q-Learning algorithm to play the game.
-
-## Game Overview
-
-The Snake game is a single-player game where the player controls a snake on a grid. The objective is to eat fruits that appear on the grid while avoiding collisions with the walls and the snake's own body. The snake grows in length whenever it eats a fruit.
-
-## AI Agent
-
-The AI agent is trained using Deep Q-Learning, a reinforcement learning algorithm. The agent uses a Deep Neural Network (DQN) model to approximate the Q-values, which represent the expected future rewards for each action in a given state. The model is trained by playing the game and updating the Q-values based on the observed rewards and state transitions.
+This is a Python program that implements a snake game with AI-controlled snakes. The goal of the AI is to control the snakes to eat the shared apple while avoiding collisions with other snakes and themselves.
 
 ## Requirements
 
 - Python 3.x
 - Pygame library
-- PyTorch library
+- Torch library
 
-## Usage
+## Instructions
 
 1. Install the required libraries using the following command:
-
    ```
    pip install pygame torch
    ```
 
-2. Run the game using the following command:
-
+2. Run the program by executing the Python file:
    ```
-   python snake_game.py
+   python snake_ai_shared_apple.py
    ```
 
-   The game window will open, and the AI agent will start playing automatically. You can observe the game progress and the snake's movements.
+3. The game window will open, and the AI-controlled snakes will start playing the game. The snakes are represented by different colors on the grid.
 
-3. To exit the game, click the close button on the game window.
+4. Each snake moves independently and tries to eat the shared apple, which is represented by a colored square. The AI uses Deep Q-Networks (DQN) to learn and make decisions.
 
-## Customization
+5. The game will continue until you close the window. You can exit the game by clicking the close button.
 
-You can modify various parameters in the code to customize the game and the AI agent's behavior. Some of the parameters you can change include:
+## Configuration
 
-- Game parameters:
-  - `WINDOW_SIZE`: The size of the game window.
-  - `GRID_SIZE`: The size of the grid on which the game is played.
-  - `GRID_OFFSET`: The offset between grid cells for visual appearance.
+The program provides some configurable parameters that you can adjust:
 
-- AI parameters:
-  - `DISCOUNT_FACTOR`: The discount factor used in the Q-Learning algorithm.
-  - `EPSILON_START`, `EPSILON_END`, `EPSILON_DECAY`: Parameters for controlling the exploration-exploitation trade-off in the AI agent's behavior.
-  - `LEARNING_RATE`: The learning rate used in the optimization of the DQN model.
-  - `BATCH_SIZE`: The batch size used for training the DQN model.
-  - `REPLAY_MEMORY_SIZE`: The size of the replay memory buffer used for experience replay.
+- `WINDOW_SIZE`: The size of the game window in pixels.
+- `GRID_SIZE`: The number of cells in the grid.
+- `GRID_OFFSET`: The offset for drawing the grid lines.
+- `MODEL_PARAMS`: A list of dictionaries specifying the AI model parameters. Each dictionary contains the following keys:
+  - `name`: The name of the model.
+  - `color`: The color of the snake controlled by the model.
+  - `discount_factor`: The discount factor for future rewards in the Q-learning algorithm.
+  - `learning_rate`: The learning rate for the neural network optimizer.
+- `EPSILON_START`, `EPSILON_END`, `EPSILON_DECAY`: The parameters for epsilon-greedy exploration.
+- `BATCH_SIZE`: The batch size for training the neural network.
+- `REPLAY_MEMORY_SIZE`: The maximum size of the replay memory for experience replay.
+
+## Saving and Loading Models
+
+The program automatically saves and loads the model parameters to/from disk. The model parameters are saved in separate files named `model_name.pth` for each model. The saved files can be found in the same directory as the Python script.
+
+To load the saved model parameters, the program checks for existing files at the beginning. If the files exist, the program loads the parameters into the corresponding models. If the files do not exist or the parameters are incompatible, the models start training from scratch.
