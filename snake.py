@@ -42,6 +42,62 @@ MODEL_PARAMS = [
         "parameter1": 0.7,
         "parameter2": "value3"
     },
+        {
+        "name": "model3",
+        "color": (125, 125, 0),
+        "discount_factor": 0.75,
+        "learning_rate": 0.005,
+        # Additional parameters for model3
+        "parameter1": 0.8,
+        "parameter2": "value4"
+    },
+    {
+        "name": "model4",
+        "color": (0, 125, 125),
+        "discount_factor": 0.65,
+        "learning_rate": 0.02,
+        # Additional parameters for model4
+        "parameter1": 0.6,
+        "parameter2": "value5"
+    },
+    {
+        "name": "model5",
+        "color": (125, 0, 125),
+        "discount_factor": 0.85,
+        "learning_rate": 0.03,
+        # Additional parameters for model5
+        "parameter1": 0.9,
+        "parameter2": "value6"
+    }, 
+{
+    "name": "model6",
+    "color": (0, 0, 125),
+    "discount_factor": 0.45,
+    "learning_rate": 0.05,
+    # Additional parameters for model6
+    "parameter1": 0.9,
+    "parameter2": "value7"
+},  # <-- This is the missing comma
+{
+    "name": "model7",
+    "color": (125, 125, 125),
+    "discount_factor": 0.7,
+    "learning_rate": 0.015,
+    # Additional parameters for model7
+    "parameter1": 0.4,
+    "parameter2": "value8"
+},
+{
+    "name": "model8",
+    "color": (255, 255, 255),
+    "discount_factor": 0.55,
+    "learning_rate": 0.02,
+    # Additional parameters for model8
+    "parameter1": 0.3,
+    "parameter2": "value9"
+}
+
+
     # Add more models here
 ]
 
@@ -340,4 +396,4 @@ while True:
     pygame.display.update()
 
     # Control the frame rate
-    clock.tick(10)
+    clock.tick(1000)
