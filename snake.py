@@ -341,21 +341,20 @@ while True:
     # AI decision for each model
     actions = []
     for i, model in enumerate(models):
-        q_values = model(torch.from_numpy(states[i]).float().unsqueeze(0))
-        if random.random() < epsilons[i]:
-            action = random.randint(0, 3)
-        else:
-            _, action = q_values.max(1)
+        q_values = model(torch.from_numpy(np.array([states[i]])).float())
+        if random.random() > epsilons[i]:  # Exploitation
+            action = torch.argmax(q_values).item()
+        else:  # Exploration
+            action = random.randint(0, 3)  # Random action
         actions.append(action)
 
-    # Perform step for each model
-    rewards = []
+    # Perform the actions and get the new states
     new_states = []
+    rewards = []
     for i, action in enumerate(actions):
         reward = step(action, i)
         rewards.append(reward)
 
-        # Get new state
         new_state = np.zeros((3, GRID_SIZE, GRID_SIZE))  # Change from 2 to 3
         head_x, head_y = snakes[i][0]
         new_state[0][head_y][head_x] = 1  # mark head position
@@ -370,21 +369,16 @@ while True:
             new_state[2] = distance(head_x, head_y, fruit[0], fruit[1])  # Add distance to fruit as a feature
         new_states.append(new_state)
 
-        # Check for collisions
-        if reward == -10:
-            # Reset the size of the snake to its initial state
-            snakes[i] = deque([(GRID_SIZE//2, GRID_SIZE//2)])
-
-    # Add to replay memory for each model
+    # Store the transition in replay memory
     for i in range(len(models)):
-        replay_memories[i].append((states[i], actions[i], rewards[i], new_states[i], rewards[i] < 0))
+        replay_memories[i].append((states[i], actions[i], rewards[i], new_states[i], False))  # False for 'done' as the game does not end
 
-        # Update model for each model
-        if len(replay_memories[i]) >= BATCH_SIZE:
-            batch = random.sample(replay_memories[i], BATCH_SIZE)
-            update_models(batch, i)
-
-        # Update epsilon for each model
+    # Train the models
+    for i in range(len(models)):
+        if len(replay_memories[i]) < BATCH_SIZE:
+            continue
+        batch = random.sample(replay_memories[i], BATCH_SIZE)
+        update_models(batch, i)
         update_epsilon(i)
 
     # Draw everything
@@ -392,8 +386,5 @@ while True:
     draw_snakes()
     draw_fruits()
 
-    # Update the window
     pygame.display.update()
-
-    # Control the frame rate
-    clock.tick(1000)
+    clock.tick(60)  # Limit the frame rate to 60 FPS
