@@ -338,57 +338,62 @@ while True:
             state[2] = distance(head_x, head_y, fruit[0], fruit[1])  # Add distance to fruit as a feature
         states.append(state)
 
-# AI decision for each model
-actions = []
-for i, model in enumerate(models):
-    q_values = model(torch.from_numpy(np.array([states[i]])).float())
-    if random.random() < epsilons[i]:
-        action = random.randint(0, 3)  # explore
-    else:
-        action = q_values.argmax().item()  # exploit
-    actions.append(action)
+    # AI decision for each model
+    actions = []
+    for i, model in enumerate(models):
+        q_values = model(torch.from_numpy(states[i]).float().unsqueeze(0))
+        if random.random() < epsilons[i]:
+            action = random.randint(0, 3)
+        else:
+            _, action = q_values.max(1)
+        actions.append(action)
 
-# Step the game for each model and collect the reward and done flag
-rewards = []
-dones = []
-new_states = []
-for i, action in enumerate(actions):
-    reward = step(action, i)
-    new_state = np.zeros((3, GRID_SIZE, GRID_SIZE))  # Change from 2 to 3
-    head_x, head_y = snakes[i][0]
-    new_state[0][head_y][head_x] = 1  # mark head position
-    for j, (x, y) in enumerate(snakes[i]):
-        if j > 0:
-            new_state[0][y][x] = -1  # mark snake body
-    for j, other_snake in enumerate(snakes):
-        if j != i:
-            for (x, y) in other_snake:
-                new_state[1][y][x] = -1  # mark other snake body
-    if fruit is not None:
-        new_state[2] = distance(head_x, head_y, fruit[0], fruit[1])  # Add distance to fruit as a feature
-    new_states.append(new_state)
-    rewards.append(reward)
-    dones.append(len(snakes[i]) == 1)
+    # Perform step for each model
+    rewards = []
+    new_states = []
+    for i, action in enumerate(actions):
+        reward = step(action, i)
+        rewards.append(reward)
 
-# Add to the replay memory for each model
-for i in range(len(models)):
-    replay_memories[i].append((states[i], actions[i], rewards[i], new_states[i], dones[i]))
+        # Get new state
+        new_state = np.zeros((3, GRID_SIZE, GRID_SIZE))  # Change from 2 to 3
+        head_x, head_y = snakes[i][0]
+        new_state[0][head_y][head_x] = 1  # mark head position
+        for j, (x, y) in enumerate(snakes[i]):
+            if j > 0:
+                new_state[0][y][x] = -1  # mark snake body
+        for j, other_snake in enumerate(snakes):
+            if j != i:
+                for (x, y) in other_snake:
+                    new_state[1][y][x] = -1  # mark other snake body
+        if fruit is not None:
+            new_state[2] = distance(head_x, head_y, fruit[0], fruit[1])  # Add distance to fruit as a feature
+        new_states.append(new_state)
 
-# Update the model for each model
-for i in range(len(models)):
-    if len(replay_memories[i]) >= BATCH_SIZE:
-        batch = random.sample(replay_memories[i], BATCH_SIZE)
-        update_models(batch, i)
+        # Check for collisions
+        if reward == -10:
+            # Reset the size of the snake to its initial state
+            snakes[i] = deque([(GRID_SIZE//2, GRID_SIZE//2)])
 
-# Update the epsilon for each model
-update_epsilons()
+    # Add to replay memory for each model
+    for i in range(len(models)):
+        replay_memories[i].append((states[i], actions[i], rewards[i], new_states[i], rewards[i] < 0))
 
-# Draw the grid, snakes, and fruits
-draw_grid()
-draw_snakes()
-draw_fruits()
+        # Update model for each model
+        if len(replay_memories[i]) >= BATCH_SIZE:
+            batch = random.sample(replay_memories[i], BATCH_SIZE)
+            update_models(batch, i)
 
-# Update the display and wait for the next frame
-pygame.display.flip()
-clock.tick(15)
+        # Update epsilon for each model
+        update_epsilon(i)
 
+    # Draw everything
+    draw_grid()
+    draw_snakes()
+    draw_fruits()
+
+    # Update the window
+    pygame.display.update()
+
+    # Control the frame rate
+    clock.tick(1000)
