@@ -126,9 +126,6 @@ def draw_window(score):
     pygame.display.flip()
 
 def extract_state():
-    # For simplicity, we extract six features: the snake's four possible directions, its distance from the fruit, and its distance from the wall
-    # More sophisticated features can be extracted in a more complex game
-    # Returns a tensor
     head = snake[0]
     dx = fruit[0] - head[0]
     dy = fruit[1] - head[1]
