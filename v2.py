@@ -5,12 +5,10 @@ import torch.nn as nn
 import torch.optim as optim
 from collections import deque
 
-# Game settings
 WINDOW_SIZE = 600
 GRID_SIZE = 20
 GRID_OFFSET = 2
 
-# DQN settings
 EPSILON_START = 1.0
 EPSILON_END = 0.01
 EPSILON_DECAY = 0.995
@@ -19,12 +17,10 @@ REPLAY_MEMORY_SIZE = 5000
 DISCOUNT_FACTOR = 0.95
 LEARNING_RATE = 0.001
 
-# Initialize pygame
 pygame.init()
 win = pygame.display.set_mode((WINDOW_SIZE, WINDOW_SIZE))
 clock = pygame.time.Clock()
 
-# DQN Model
 class DQN(nn.Module):
     def __init__(self, input_size, output_size, hidden_size=128):
         super(DQN, self).__init__()
@@ -37,14 +33,12 @@ class DQN(nn.Module):
         x = torch.relu(self.fc2(x))
         return self.fc3(x)
 
-# Initialize DQN model and settings
 model = DQN(6, 4)
 criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 replay_memory = deque(maxlen=REPLAY_MEMORY_SIZE)
 epsilon = EPSILON_START
 
-# Snake game settings
 snake = deque([(GRID_SIZE//2, GRID_SIZE//2)])
 direction = 0
 fruit = random.randint(0, GRID_SIZE-1), random.randint(0, GRID_SIZE-1)
@@ -58,13 +52,13 @@ def reset():
 def step(action):
     global snake, direction, fruit
 
-    if action == 0:  # UP
+    if action == 0:
         head = snake[0][0], snake[0][1] - 1
-    elif action == 1:  # RIGHT
+    elif action == 1:
         head = snake[0][0] + 1, snake[0][1]
-    elif action == 2:  # DOWN
+    elif action == 2:
         head = snake[0][0], snake[0][1] + 1
-    elif action == 3:  # LEFT
+    elif action == 3:
         head = snake[0][0] - 1, snake[0][1]
 
     if head in snake or head[0] < 0 or head[0] >= GRID_SIZE or head[1] < 0 or head[1] >= GRID_SIZE:
@@ -90,7 +84,6 @@ def game_loop():
             if event.type == pygame.QUIT:
                 running = False
 
-        # DQN chooses action
         state = extract_state()
         if random.random() < epsilon:
             action = random.randint(0, 3)
@@ -101,16 +94,13 @@ def game_loop():
         reward = step(action)
         score += reward
 
-        # Save to replay memory
         next_state = extract_state()
         replay_memory.append((state, action, reward, next_state))
 
-        # Train the model using replay memory
         if len(replay_memory) >= BATCH_SIZE:
             minibatch = random.sample(replay_memory, BATCH_SIZE)
             train(minibatch)
 
-        # Decrease epsilon
         epsilon = max(EPSILON_END, epsilon * EPSILON_DECAY)
 
         draw_window(score)
